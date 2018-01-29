@@ -2,7 +2,6 @@
 
 import argparse
 import json
-import os
 import urllib.request
 
 parser = argparse.ArgumentParser(description="rspamd web interface statistic fetcher for InfluxDB usage")
@@ -21,20 +20,20 @@ try:
     resp = urllib.request.urlopen(fetch_url)
 except Exception:
     print("Could not send GET request to given URL. Check url parameter!")
-    os.exit(1)
+    exit(1)
 
 # Authorization failed
 if resp.code == 403:
     print("Authorization with rspamd web interface failed. Check password parameter!")
-    os.exit(1)
+    exit(1)
 
 elif resp.code == 404:
     print("HTTP server returned HTTP status code 404. Check url parameter!")
-    os.exit(1)
+    exit(1)
 
 elif resp.code == 200:
     # Successful call
-    json = json.loads(resp.read())
+    json = json.loads(resp.read().decode('utf-8'))
 
     action_reject = str(json["actions"]["reject"]) + "i"
     action_soft_reject = str(json["actions"]["soft reject"]) + "i"
@@ -81,9 +80,9 @@ elif resp.code == 200:
                                                                                       stat_total_learns,
                                                                                       stat_fuzzy_rspamd))
 
-    os.exit(0)
+    exit(0)
 
 else:
     print("Web request returned unhandled HTTP status code " + str(resp.code) + ". Please open an issue at GitHub "
                                                                                 "with further details.")
-    os.exit(1)
+    exit(1)

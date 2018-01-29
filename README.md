@@ -6,3 +6,6 @@ Quick and dirty approach to get stats of rspamd out of the webinterface's API in
 
 ## Utilization
 Use this script call within InfluxData's Telegraf
+
+## Grafana example
+![Grafana Example](https://raw.githubusercontent.com/thannaske/rspamd-influxdb/master/grafana-example.png)

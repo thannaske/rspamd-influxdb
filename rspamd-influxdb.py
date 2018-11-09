@@ -5,16 +5,58 @@ import json
 import urllib.request
 
 parser = argparse.ArgumentParser(description="rspamd web interface statistic fetcher for InfluxDB usage")
-parser.add_argument("url", action="store", help="URL to rspamd web interface installation")
-parser.add_argument("password", action="store", help="Password for API authentication (same as for graphical login)")
+parser.add_argument("--url", action="store", help="URL to rspamd web interface installation")
+parser.add_argument("--password", action="store", help="Password for API authentication (same as for graphical login)")
+parser.add_argument("--config", action="store", help="Path to the configuration file for the application to use")
 
 args = parser.parse_args()
 
-# Make sure we got the trailing slash at the URL
-if str.endswith(args.url, "/"):
-    fetch_url = args.url + "stat?password=" + urllib.parse.quote_plus(args.password)
+# Perform some stupid basic validation on the arguments
+if (args.url is None and args.password is None) and args.config is None:
+    parser.error("Please provide --url and --password arguments or the path to a configuration file using --config")
+
+if (args.url is None and args.password is not None) or (args.url is not None and args.password is None):
+    parser.error("Please use --url with the --password argument and way round. You may provide the path to a "
+                 "configuration file by only using the --config argument.")
+
+if args.url is not None and args.password is not None and args.config is not None:
+    parser.error("Please provide whether --url and --password arguments *or* --config argument.")
+
+if args.config is not None and (args.url is not None or args.password is not None):
+    parser.error("Please provide whether --url and --password arguments *or* --config argument.")
+
+# Basic variable initialization
+url = None
+password = None
+
+# Read variables from file if necessary
+if args.config is not None:
+    data = None
+
+    try:
+        fh = open(args.config, "r")
+        data = json.load(fh)
+    except IOError as e:
+        parser.error("Could not read JSON config from file. Received IOError: " + str(e))
+
+    if data is not None and ("url" not in data or "password" not in data):
+        parser.error("Could not read URL and password from JSON configuration. Please see documentation for correct "
+                     "configuration file formatting.")
+    elif data is None:
+        parser.error("Something went wrong during parsing of JSON configuration file. Please check your configuration!")
+    else:
+        url = data['url']
+        password = data['password']
 else:
-    fetch_url = args.url + "/stat?password=" + urllib.parse.quote_plus(args.password)
+    # Read variable from args
+    url = args.url
+    password = args.password
+
+# Make sure we got the trailing slash at the URL
+if str.endswith(url, "/"):
+    fetch_url = url + "stat?password=" + urllib.parse.quote_plus(password)
+else:
+    fetch_url = url + "/stat?password=" + urllib.parse.quote_plus(password)
 
 try:
     resp = urllib.request.urlopen(fetch_url)

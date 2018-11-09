@@ -21,12 +21,19 @@ The configuration file needs to contain the fields `url` and `password` as valid
 Use this script call within InfluxData's Telegraf
 
 e.g.:
-```
+```toml
 [[inputs.exec]]
-	commands = ["python3 /opt/rspamd-influxdb/rspamd-influxdb.py http://localhost:11334/ superSecretPassword"]
+	commands = ["python3 /opt/rspamd-influxdb/rspamd-influxdb.py --config /etc/telegraf/tools-conf/rspamd-fetch.json"]
 	timeout = "5s"
 	data_format = "influx"
 ```
+
+**Security Tip**
+```sh
+chown root:telegraf /etc/telegraf/tools-conf/rspamd-fetch.json
+chmod 640 /etc/telegraf/tools-conf/rspamd-fetch.json
+```
+
 
 ## Grafana example
 ![Grafana Example](https://raw.githubusercontent.com/thannaske/rspamd-influxdb/master/grafana-example.png)

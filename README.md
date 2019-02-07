@@ -36,4 +36,4 @@ chmod 640 /etc/telegraf/tools-conf/rspamd-fetch.json
 
 
 ## Grafana example
-![Grafana Example](https://raw.githubusercontent.com/thannaske/rspamd-influxdb/master/grafana-example.png)
+![Grafana Example](grafana-example.png)
